@@ -10,7 +10,9 @@ from openai import OpenAI
 
 RESPONSES_PREFIXES: Tuple[str, ...] = ("o", "gpt-5", "gpt-4.1", "gpt-4o")
 REASONING_PREFIXES: Tuple[str, ...] = ("o",)
-DEFAULT_FALLBACK_MODELS: List[str] = ["gpt-5-mini", "gpt-4o-mini"]
+# 主模型失敗時的備援順序：先退到同世代較便宜的 GPT-5.6，最後才退到 GPT-4o mini。
+# 舊的 gpt-5-mini 將於 2026-12-11 自 API 下線，已改為 gpt-5.6-terra / luna。
+DEFAULT_FALLBACK_MODELS: List[str] = ["gpt-5.6-terra", "gpt-5.6-luna", "gpt-4o-mini"]
 
 
 def _resolve_max_output_tokens(model_name: str, requested: int) -> int:

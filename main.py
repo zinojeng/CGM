@@ -93,27 +93,52 @@ st.title("CGM 數據分析")
 
 st.sidebar.title("設定")
 
-model_options = {
-    "gpt-5": "gpt-5",
-    "gpt-5-mini": "gpt-5-mini",
-    "gpt-5-nano": "gpt-5-nano",
-    "gpt-4o": "gpt-4o",
-    "gpt-4o-mini": "gpt-4o-mini"
+# 可選分析模型：key 為 API model id，value 為 UI 顯示用說明。
+# GPT-5.6 系列為目前最新世代；舊的 gpt-5 / gpt-5-mini / gpt-5-nano 已於
+# 2026-06-11 公告淘汰，並將於 2026-12-11 自 API 下線，故不再列為選項
+# （官方對應替代品分別為 sol / terra / luna）。
+MODEL_OPTIONS = {
+    "gpt-5.6-sol": {
+        "label": "GPT-5.6 Sol — 旗艦推理",
+        "note": "分析品質最高，適合複雜或難解個案。約 $5 / $30 每 1M tokens（輸入 / 輸出）",
+    },
+    "gpt-5.6-terra": {
+        "label": "GPT-5.6 Terra — 均衡（推薦）",
+        "note": "品質與成本兼顧，適合日常報告產出。約 $2 / $12 每 1M tokens（輸入 / 輸出）",
+    },
+    "gpt-5.6-luna": {
+        "label": "GPT-5.6 Luna — 高效省成本",
+        "note": "適合大量批次分析。約 $0.20 / $1.20 每 1M tokens（輸入 / 輸出）",
+    },
+    "gpt-4o": {
+        "label": "GPT-4o — 舊版通用",
+        "note": "非推理模型，回應較快但分析深度較淺。約 $2.50 / $10 每 1M tokens（輸入 / 輸出）",
+    },
+    "gpt-4o-mini": {
+        "label": "GPT-4o mini — 舊版最省",
+        "note": "成本最低，適合快速試跑或驗證流程。約 $0.15 / $0.60 每 1M tokens（輸入 / 輸出）",
+    },
 }
+
+DEFAULT_MODEL_KEY = "gpt-5.6-terra"
+
+_model_keys = list(MODEL_OPTIONS.keys())
 
 selected_model = st.sidebar.selectbox(
     "選擇分析模型：",
-    list(model_options.keys()),
+    _model_keys,
+    index=_model_keys.index(DEFAULT_MODEL_KEY),
+    format_func=lambda key: MODEL_OPTIONS[key]["label"],
     help=(
-        "可用模型 (USD 定價以官方公告為準)：\n"
-        "o3-mini: 通用聊天模型\n"
-        "o3: 強化版推理模型\n"
-        "o5-mini: 需預先取得 o5 權限\n"
-        "o5: 需預先取得 o5 權限\n"
-        "o5-thinking / o5-reasoning: 深度推理版本（需權限）\n"
-        "gpt-4o-mini: 成本效益較佳的 GPT-4o 衍生模型"
+        "可用模型 (USD 定價以官方公告為準)：\n\n"
+        + "\n".join(
+            f"- {config['label']}：{config['note']}"
+            for config in MODEL_OPTIONS.values()
+        )
     )
 )
+
+st.sidebar.caption(MODEL_OPTIONS[selected_model]["note"])
 
 openai_api_key = st.sidebar.text_input(
     label="請輸入您的 OpenAI API 金鑰：",
